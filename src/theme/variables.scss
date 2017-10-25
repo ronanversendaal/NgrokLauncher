@@ -72,7 +72,9 @@ $colors: (
 
 @import "ionic.theme.dark";
 
+$color-primary : color($colors, primary);
 $toolbar-background: color($colors, primary);
+
 // Ionicons
 // --------------------------------------------------
 // The premium icon font for Ionic. For more info, please see:

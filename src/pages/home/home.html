@@ -7,19 +7,45 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content>
 
-  <p text-center >
-    Enter the subdomain of your ngrok.io tunnel to launch in the browser.
+  <div padding>
+    <p text-center >
+      Enter the subdomain of your ngrok.io tunnel to launch in the browser.
 
-    <br/><br/>
-    <small>Example: Enter "86cc324f" for "86cc324f.ngrok.io"</small>
-  </p>
+      <br/><br/>
+      <small>Example: Enter "86cc324f" for "86cc324f.ngrok.io"</small>
+    </p>
 
-  <ion-input full outline text-center color="primary" placeholder="xxxxxx" [(ngModel)]="this.url" ></ion-input>
+    <ion-input id="launcher" full outline text-center color="primary" placeholder="xxxxxx" [(ngModel)]="this.url" ></ion-input>
+  </div>
+
+  <div padding-horizontal>
+    <h3 ion-text>Recent visits</h3> 
+  </div>
+
+    <ion-scroll padding-horizontal style="height:43vh" scrollY="true">     
+      <ion-list scroll="true">
+        <div ion-item *ngFor="let item of recents">
+          <a (click)="itemTapped($event, item)">
+            <small>{{item.url}}.ngrok.io</small>
+          </a>
+          <small class="item-note" item-end>
+            {{item.date}}
+          </small>
+          <button outline ion-button icon-only item-end>
+            <ion-icon name="star-outline"></ion-icon>
+          </button>
+        </div>
+      </ion-list>  
+  </ion-scroll>
+
+
+  <div padding>
+    <button ion-button block outline (click)="launch(this.url.toLowerCase())">Launch</button>
+  </div>
+  
+
 </ion-content>
 <ion-footer>
-  <div padding>
-    <button ion-button block outline (click)="launch(this.url)">Launch</button>
-  </div>
 </ion-footer>

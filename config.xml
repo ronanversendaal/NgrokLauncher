@@ -91,4 +91,5 @@
     <plugin name="cordova-plugin-inappbrowser" spec="^1.7.1" />
     <plugin name="cordova-plugin-statusbar" spec="^2.2.3" />
     <plugin name="cordova-plugin-recentscontrol" spec="git+https://github.com/smcpjames/cordova-plugin-recentscontrol.git" />
+    <plugin name="cordova-sqlite-storage" spec="^2.0.4" />
 </widget>

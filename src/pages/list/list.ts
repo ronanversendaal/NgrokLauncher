@@ -28,7 +28,7 @@ export class ListPage {
         };
 
     this.items = [];
-    for (let i = 1; i < 11; i++) {
+    for (let i = 1; i < 15; i++) {
       this.items.push({
         url: this.stringGen(6),
         date: this.randomDate(new Date(2017, 10, 22), new Date()).toLocaleString()
@@ -57,29 +57,6 @@ export class ListPage {
       return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
   }
 
-  itemTapped(event, item) {
-    this.launch(item.url)
-  }
-
-  setErrorMessage(message){
-      this.messages.success = '';
-      this.messages.error = message;
-
-      setTimeout(()=>{
-          this.messages.error = '';
-      },3000);   
-  }
-
-  setSuccessMessage(message){
-
-      this.messages.error = '';
-      this.messages.success = message;
-
-      setTimeout(()=>{
-          this.messages.success = '';
-      },3000);   
-  }
-
   launch(url) {
 
       let ngrok_url = 'https://'+url;
@@ -91,9 +68,9 @@ export class ListPage {
           }
       }).subscribe(data => {}, err => {
           if(err.status === 0){
-              this.setErrorMessage('Ngrok domain unreachable. Are you on WiFi?');
+              // this.setErrorMessage('Ngrok domain unreachable. Are you on WiFi?');
           } else if(err.status === 404){
-              this.setErrorMessage('Ngrok domain unreachable. Please check the code and try again.');
+              // this.setErrorMessage('Ngrok domain unreachable. Please check the code and try again.');
           }
       });
 

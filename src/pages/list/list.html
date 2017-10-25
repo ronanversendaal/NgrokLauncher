@@ -3,24 +3,25 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>List</ion-title>
+    <ion-title>Subdomains</ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content>
 
-  <p ion-text text-center color="danger" *ngIf="this.messages.error != ''" color="danger">{{this.messages.error}}</p>
-  <p ion-text color="success" *ngIf="this.messages.success != ''" color="success">{{this.messages.success}}</p>
-
-  <ion-list>
-    <button ion-item *ngFor="let item of items" (click)="itemTapped($event, item)">
-      {{item.url}}<small>.ngrok.io</small>
-      <small class="item-note" item-end>
-        {{item.date}}
-      </small>
-    </button>
-  </ion-list>
-  <div *ngIf="selectedItem" padding>
-    You navigated here from <b>{{selectedItem.title}}</b>
-  </div>
+  <ion-scroll style="height:100vh" scrollY="true">     
+      <ion-list scroll="true">
+        <div ion-item *ngFor="let item of items">
+          <a (click)="itemTapped($event, item)">
+            <small>{{item.url}}.ngrok.io</small>
+          </a>
+          <small class="item-note" item-end>
+            {{item.date}}
+          </small>
+          <button ion-button outline icon-only item-end>
+            <ion-icon name="trash"></ion-icon>
+          </button>
+        </div>
+      </ion-list>  
+  </ion-scroll>
 </ion-content>
