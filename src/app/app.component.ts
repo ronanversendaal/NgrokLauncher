@@ -18,11 +18,11 @@ export class MyApp {
 
   constructor(public platform: Platform, public statusBar: StatusBar, public splashScreen: SplashScreen) {
     this.initializeApp();
-
+    
     // used for an example of ngFor and navigation
     this.pages = [
-      { title: 'Home', component: HomePage },
-      { title: 'List', component: ListPage }
+      { title: 'Launcher', component: HomePage },
+      { title: 'Saved domains', component: ListPage }
     ];
 
   }
@@ -31,7 +31,13 @@ export class MyApp {
     this.platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
-      this.statusBar.styleDefault();
+      this.statusBar.styleBlackTranslucent();
+
+      let isAndroid:boolean = this.platform.is('android');
+      if (isAndroid) {
+          this.statusBar.backgroundColorByHexString("#dd4814");
+      }
+
       this.splashScreen.hide();
     });
   }

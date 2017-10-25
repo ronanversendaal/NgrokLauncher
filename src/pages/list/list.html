@@ -8,13 +8,16 @@
 </ion-header>
 
 <ion-content>
+
+  <p ion-text text-center color="danger" *ngIf="this.messages.error != ''" color="danger">{{this.messages.error}}</p>
+  <p ion-text color="success" *ngIf="this.messages.success != ''" color="success">{{this.messages.success}}</p>
+
   <ion-list>
     <button ion-item *ngFor="let item of items" (click)="itemTapped($event, item)">
-      <ion-icon [name]="item.icon" item-start></ion-icon>
-      {{item.title}}
-      <div class="item-note" item-end>
-        {{item.note}}
-      </div>
+      {{item.url}}<small>.ngrok.io</small>
+      <small class="item-note" item-end>
+        {{item.date}}
+      </small>
     </button>
   </ion-list>
   <div *ngIf="selectedItem" padding>
