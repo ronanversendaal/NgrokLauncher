@@ -2,23 +2,41 @@ import { Component } from '@angular/core';
 import { NavController, NavParams, Events  } from 'ionic-angular';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { Http } from '@angular/http';
+import { Storage } from '@ionic/storage';
+import { ToastController } from 'ionic-angular';
 import 'rxjs/add/operator/catch';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/finally';
+import moment from 'moment';
+import _ from 'lodash';
+import { AlertController } from 'ionic-angular';
+import { Network } from '@ionic-native/network';
 
 @Component({
   selector: 'page-list',
   templateUrl: 'list.html',
   providers : [
-    InAppBrowser
+    InAppBrowser,
+    Network
   ]
 })
 export class ListPage {
   selectedItem: any;
   icons: string[];
-  items: Array<{url: string, date: string, active : false}>;
+  subdomains: Array<{url: string, date: string, active : boolean, fav : boolean}>;
   messages: any;
   active : any;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private iab: InAppBrowser, public http: Http, public events: Events) {
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams, 
+    private iab: InAppBrowser, 
+    public http: Http, 
+    public events: Events,
+    public toastCtrl: ToastController,
+    private storage: Storage,
+    public alertCtrl: AlertController,
+    private network: Network) {
     // If we navigated to this page, we will have an item available as a nav param
     this.selectedItem = navParams.get('item');
     this.http = http;
@@ -29,45 +47,41 @@ export class ListPage {
         error : ''
     };
 
-    this.items = [];
-    for (let i = 1; i < 15; i++) {
+    this.subdomains = [];
 
-      let new_url = this.stringGen(6);
+    // storage.clear();
+    // storage.set('subdomains', [{url : 'oakwddw', date : '2017-10-24 12:41'}]);
 
-      this.pingUrl(new_url).subscribe(active => {
-        this.active = active.ok;
-      }, err => {
-        console.log(err);
-        this.active = err.ok;
-      })
+    storage.get('subdomains').then((subdomains) => {
+        if(!subdomains){
+          subdomains = []
+        }
 
-       this.items.push({
-          url: new_url,
-          date: this.randomDate(new Date(2017, 10, 22), new Date()).toLocaleString(),
-          active : this.active,
-        });
-    }
+        subdomains = _.sortBy(subdomains, function(o) { return moment(o.date); }).reverse();
+
+        for (const {domain, index} of subdomains.map((domain, index) => ({domain, index}))) {
+            this.subdomains.push({
+                url: domain.url,
+                date: domain.date,
+                active : false,
+                fav : true,
+            });
+
+            this.pingUrl(domain.url).finally(() => {
+                this.subdomains[index].active = this.active;
+            }).subscribe(active => {
+                this.active = active;
+            }, err => {
+                this.active = err.ok;
+            });
+        }
+    });
 
     events.subscribe('ngrok:launch', (ngrok_url) => {
         // Fire the inAppBrowser via an event so we can still access the this object after checking the url. 
         this.iab.create(ngrok_url, "_system", "location=true");
     });
-  }
 
-  stringGen(len)
-  {
-      var text = "";
-      
-      var charset = "abcdefghijklmnopqrstuvwxyz0123456789";
-      
-      for( var i=0; i < len; i++ )
-          text += charset.charAt(Math.floor(Math.random() * charset.length));
-      
-      return text;
-  }
-
-  randomDate(start, end) {
-      return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
   }
 
   pingUrl(url){
@@ -76,22 +90,60 @@ export class ListPage {
       return this.http.get(ngrok_url).map(active => active.ok);
   }
 
+  removeSubdomain(item, index){
+
+    let data = {
+      item , index
+    }
+    
+    this.subdomains = this.subdomains.filter(item => data.item.url != item.url);
+    this.events.publish('subdomains:unfav', data.item);
+
+    return this.storage.set('subdomains', this.subdomains);
+  }
+
   launch(url) {
 
-      let ngrok_url = 'https://'+url;
+        // this.url = url;
 
-      this.http.get(ngrok_url).map(data =>{
-          if(data.ok){
-              // Fire of an event so we can launch the browser
-              this.events.publish('ngrok:launch', ngrok_url);
-          }
-      }).subscribe(data => {}, err => {
-          if(err.status === 0){
-              // this.setErrorMessage('Ngrok domain unreachable. Are you on WiFi?');
-          } else if(err.status === 404){
-              // this.setErrorMessage('Ngrok domain unreachable. Please check the code and try again.');
-          }
+        if(this.network.type !== 'wifi'){
+            this.presentToast('No WiFi connection detected. Unable to launch ngrok.io domains.');
+            return false;
+        }
+
+        let ngrok_url = 'https://'+url+'.ngrok.io';
+
+        this.http.get(ngrok_url).map(data =>{
+            if(data.ok){
+                // Fire of an event so we can launch the browser
+                this.events.publish('ngrok:launch', ngrok_url, url);
+            }
+        }).subscribe(data => {}, err => {
+            if(err.status === 0){
+                this.presentToast('Ngrok domain invalid or unreachable. Please enter a valid ngrok.io subdomain.', 4000);
+            } else if(err.status === 404){
+                this.presentToast('Ngrok domain unreachable. Please check the code and try again.', 4000);
+            }
+        });
+    }
+
+  itemTapped(event, item) {
+
+      this.launch(item.url);
+    }
+
+
+    presentToast(message, duration = 3000, position = 'bottom') {
+      const toast = this.toastCtrl.create({
+        message: message,
+        duration: duration,
+        position: position,
+        dismissOnPageChange : true,
       });
 
+      toast.onDidDismiss(() => {
+      });
+
+      toast.present();
     }
 }

@@ -26,15 +26,20 @@
 
     <ion-scroll style="height:43vh" scrollY="true">     
       <ion-list no-lines scroll="true">
-        <div ion-item *ngFor="let item of recents">
-          <a (click)="itemTapped($event, item)">
+        <div ion-item *ngFor="let item of recents; let i = index">
+          <div class="online-indicator" padding-right item-start>
+            <div *ngIf="item.active" rounded class="online"></div>
+            <div *ngIf="!item.active" rounded class="offline"></div>
+          </div>
+          <a padding-left (click)="itemTapped($event, item)">
             <small>{{item.url}}.ngrok.io</small>
           </a>
           <small class="item-note" item-end>
             {{item.date}}
           </small>
-          <button outline ion-button icon-only item-end>
-            <ion-icon name="star-outline"></ion-icon>
+          <button ion-button outline icon-only item-end (click)="toggleSubdomains(item, i)">
+            <ion-icon *ngIf="item.fav"  name="star"></ion-icon>
+            <ion-icon *ngIf="!item.fav"  name="star-outline"></ion-icon>
           </button>
         </div>
       </ion-list>  

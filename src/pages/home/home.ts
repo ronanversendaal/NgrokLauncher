@@ -25,7 +25,7 @@ export class HomePage {
 
     public url: string;
     public ngrok_url : string;
-    public recents : Array<{url: string, date: string}>;
+    public recents : Array<{url: string, date: string, active : boolean, fav : boolean}>;
 
     constructor(
         public navCtrl: NavController, 
@@ -42,10 +42,6 @@ export class HomePage {
         this.iab = iab;
         this.storage = storage;
         this.recents = [];
-        
-
-        // storage.set('recents', [{url: 'dejdei', date : '2017-10-24 12:41' }, {url : 'oakwddw', date : '2017-10-24 12:41'},{url: 'dejsddei', date : '2017-10-24 12:41' }, {url : 'oakwfdsddw', date : '2017-10-24 12:41'},{url: 'defjdei', date : '2017-10-24 12:41' }, {url : 'oakwdfdw', date : '2017-10-24 12:41'},{url: 'dfejdei', date : '2017-10-24 12:41' }, {url : 'oakwdfdw', date : '2017-10-24 12:41'}]);
-        // storage.clear();
 
         this.network.onConnect().subscribe(() => {
           // We just got a connection but we need to wait briefly
@@ -58,10 +54,31 @@ export class HomePage {
           }, 3000);
         });
 
+
+    // storage.clear();
+    // storage.set('recents', [{url : 'oakwddw', date : '2017-10-24 12:41', fav : false}, {url: '51a99066', date : '2017-10-24 12:43', fav : false }]);
+
         storage.get('recents').then((recents) => {
-            console.log('get', recents);
             if(recents){
-                this.recents = recents;
+                // recents = _.sortBy(recents, function(o) { return moment(o.date); }).reverse();
+
+                for (const {domain, index} of recents.map((domain, index) => ({domain, index}))) {
+
+                    this.recents.push({
+                        url: domain.url,
+                        date: domain.date,
+                        active : false,
+                        fav : domain.fav
+                    });
+
+                    this.pingUrl(domain.url).finally(() => {
+                        this.recents[index].active = this.active;
+                    }).subscribe(active => {
+                        this.active = active;
+                    }, err => {
+                        this.active = err.ok;
+                    });
+                }
             }
         });
         
@@ -74,6 +91,19 @@ export class HomePage {
             });
             
         });
+
+        events.subscribe('subdomains:unfav', (index) => {
+
+            var removed = this.recents.filter(item => item.url !== index.url);
+            var search = this.recents.find(item => item.url === index.url);
+
+            search.fav = false;
+            removed.push(search);
+
+            this.recents = removed;
+
+            this.storage.set('recents', removed);
+        })
 
 
     }
@@ -114,26 +144,61 @@ export class HomePage {
     this.launch(item.url);
   }
 
+
+  pingUrl(url){
+      let ngrok_url = 'https://'+url+'.ngrok.io';
+
+      return this.http.get(ngrok_url).map(active => active.ok);
+  }
+
   addToRecents(url){
 
-      this.recents = _.sortBy(this.recents, function(o) { return moment(o.date); }).reverse();
-
       let remove = this.recents.filter(recent => (recent.url.toLowerCase() === url.toLowerCase()));
+      let fav = false;
+
+      if(remove[0].fav){
+          fav = remove[0].fav
+      }
+
       this.recents = this.recents.filter(recent => remove.indexOf(recent) < 0);
 
-      this.recents.unshift({url : url, date :  new Date().toLocaleString()});
+      this.recents.unshift({url : url, date :  new Date().toLocaleString(), active : true, fav : fav});
 
       // @todo 10 should be some setting/constant
       // Removes the last recent if limit exceeded.
-      console.log(this.recents.length)
       if(this.recents.length > 10){
           this.recents.pop();
-      console.log(this.recents.length)
       }
 
 
 
     return this.storage.set('recents', this.recents);
+  }
+
+  toggleSubdomains(item, index){
+
+      this.recents[index].fav = !this.recents[index].fav;
+      this.storage.set('recents', this.recents);
+
+      this.storage.get('subdomains').then((subdomains) => {
+          if(!subdomains){
+              subdomains = [];
+          }
+
+          let remove = subdomains.filter(domain => (domain.url.toLowerCase() === item.url.toLowerCase()));
+          subdomains = subdomains.filter(domain => remove.indexOf(domain) < 0);
+
+          item.fav = this.recents[index].fav;
+          item.active = true;
+
+          let domain = item;
+
+          // Only add the new domain if it has fav = true
+          if(item.fav){
+              subdomains.unshift(domain);    
+          }
+          return this.storage.set('subdomains', subdomains);
+      });
   }
 
     presentToast(message, duration = 3000, position = 'bottom') {
