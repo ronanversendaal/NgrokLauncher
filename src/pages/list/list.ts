@@ -49,12 +49,10 @@ export class ListPage {
 
     this.subdomains = [];
 
-    // storage.clear();
-    // storage.set('subdomains', [{url : 'oakwddw', date : '2017-10-24 12:41'}]);
-
     storage.get('subdomains').then((subdomains) => {
         if(!subdomains){
-          subdomains = []
+          subdomains = [];
+          this.presentToast('No saved subdomains. Add some by pressing the star button on recent entries in the Launcher.', null, 'bottom', true);
         }
 
         subdomains = _.sortBy(subdomains, function(o) { return moment(o.date); }).reverse();
@@ -133,12 +131,13 @@ export class ListPage {
     }
 
 
-    presentToast(message, duration = 3000, position = 'bottom') {
+    presentToast(message, duration = 3000, position = 'bottom', confirm = false) {
       const toast = this.toastCtrl.create({
         message: message,
         duration: duration,
         position: position,
         dismissOnPageChange : true,
+        showCloseButton : confirm
       });
 
       toast.onDidDismiss(() => {

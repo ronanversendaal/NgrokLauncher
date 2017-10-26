@@ -6,8 +6,6 @@ import { Network } from '@ionic-native/network';
 
 import 'rxjs/add/operator/map';
 import { ToastController } from 'ionic-angular';
-import moment from 'moment';
-import _ from 'lodash';
 
 
 import { Storage } from '@ionic/storage';
@@ -26,6 +24,7 @@ export class HomePage {
     public url: string;
     public ngrok_url : string;
     public recents : Array<{url: string, date: string, active : boolean, fav : boolean}>;
+    public active : any;
 
     constructor(
         public navCtrl: NavController, 
@@ -55,8 +54,7 @@ export class HomePage {
         });
 
 
-    // storage.clear();
-    // storage.set('recents', [{url : 'oakwddw', date : '2017-10-24 12:41', fav : false}, {url: '51a99066', date : '2017-10-24 12:43', fav : false }]);
+    storage.clear();
 
         storage.get('recents').then((recents) => {
             if(recents){

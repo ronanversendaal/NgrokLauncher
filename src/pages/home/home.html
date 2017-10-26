@@ -20,7 +20,7 @@
     <ion-input id="launcher" full outline text-center color="primary" placeholder="xxxxxx" [(ngModel)]="this.url" ></ion-input>
   </div>
 
-  <div padding-horizontal>
+  <div padding-horizontal *ngIf="recents.length > 0">
     <h3 ion-text>Recent visits</h3> 
   </div>
 

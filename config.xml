@@ -3,7 +3,7 @@
     <name>Ngrok Launcher</name>
     <description>Lauch Ngrok subdomains for easy development</description>
     <author email="info@ronanversendaal.com" href="https://ronanversendaal.com/">Ronan Versendaal</author>
-    <content original-src="index.html" src="http://192.168.2.18:8100" />
+    <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
