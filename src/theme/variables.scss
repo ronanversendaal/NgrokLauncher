@@ -73,6 +73,9 @@ $colors: (
 @import "ionic.theme.dark";
 
 $color-primary : color($colors, primary);
+$color-secondary : color($colors, secondary);
+$color-danger : color($colors, danger);
+
 $toolbar-background: color($colors, primary);
 
 // Ionicons

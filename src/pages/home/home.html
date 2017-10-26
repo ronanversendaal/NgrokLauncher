@@ -24,8 +24,8 @@
     <h3 ion-text>Recent visits</h3> 
   </div>
 
-    <ion-scroll padding-horizontal style="height:43vh" scrollY="true">     
-      <ion-list scroll="true">
+    <ion-scroll style="height:43vh" scrollY="true">     
+      <ion-list no-lines scroll="true">
         <div ion-item *ngFor="let item of recents">
           <a (click)="itemTapped($event, item)">
             <small>{{item.url}}.ngrok.io</small>

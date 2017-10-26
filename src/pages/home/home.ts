@@ -2,10 +2,13 @@ import { Component } from '@angular/core';
 import { Platform, NavController, Events } from 'ionic-angular';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { Http } from '@angular/http';
+import { Network } from '@ionic-native/network';
+
 import 'rxjs/add/operator/map';
 import { ToastController } from 'ionic-angular';
 import moment from 'moment';
 import _ from 'lodash';
+
 
 import { Storage } from '@ionic/storage';
 
@@ -13,7 +16,8 @@ import { Storage } from '@ionic/storage';
   selector: 'page-home',
   templateUrl: 'home.html',
   providers : [
-    InAppBrowser
+    InAppBrowser,
+    Network
   ]
 })
 
@@ -30,7 +34,8 @@ export class HomePage {
         public http: Http, 
         public events: Events,
         public toastCtrl: ToastController,
-        private storage: Storage) {
+        private storage: Storage,
+        private network: Network) {
 
         this.platform = platform;
         this.http = http;
@@ -41,6 +46,17 @@ export class HomePage {
 
         // storage.set('recents', [{url: 'dejdei', date : '2017-10-24 12:41' }, {url : 'oakwddw', date : '2017-10-24 12:41'},{url: 'dejsddei', date : '2017-10-24 12:41' }, {url : 'oakwfdsddw', date : '2017-10-24 12:41'},{url: 'defjdei', date : '2017-10-24 12:41' }, {url : 'oakwdfdw', date : '2017-10-24 12:41'},{url: 'dfejdei', date : '2017-10-24 12:41' }, {url : 'oakwdfdw', date : '2017-10-24 12:41'}]);
         // storage.clear();
+
+        this.network.onConnect().subscribe(() => {
+          // We just got a connection but we need to wait briefly
+           // before we determine the connection type. Might need to wait.
+          // prior to doing any api requests as well.
+          setTimeout(() => {
+            if (this.network.type !== 'wifi') {
+                 this.presentToast('No WiFi connection detected. Unable to launch ngrok.io domains.'); 
+            }
+          }, 3000);
+        });
 
         storage.get('recents').then((recents) => {
             console.log('get', recents);
@@ -68,6 +84,11 @@ export class HomePage {
         // this.url = url;
 
         this.platform.ready().then(() => {
+
+            if(this.network.type !== 'wifi'){
+                this.presentToast('No WiFi connection detected. Unable to launch ngrok.io domains.');
+                return false;
+            }
 
             let ngrok_url = 'https://'+url+'.ngrok.io';
 

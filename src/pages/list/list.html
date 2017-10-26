@@ -8,11 +8,14 @@
 </ion-header>
 
 <ion-content>
-
   <ion-scroll style="height:100vh" scrollY="true">     
-      <ion-list scroll="true">
+      <ion-list no-lines scroll="true">
         <div ion-item *ngFor="let item of items">
-          <a (click)="itemTapped($event, item)">
+          <div class="online-indicator" padding-right item-start>
+            <div *ngIf="item.active" rounded class="online"></div>
+            <div *ngIf="!item.active" rounded class="offline"></div>
+          </div>
+          <a padding-left (click)="itemTapped($event, item)">
             <small>{{item.url}}.ngrok.io</small>
           </a>
           <small class="item-note" item-end>
