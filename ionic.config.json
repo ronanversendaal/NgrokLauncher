@@ -1,6 +1,6 @@
 {
   "name": "NgrokLauncher",
-  "app_id": "com.ronanversendaal.ngroklauncher",
+  "app_id": "33a29ba0",
   "type": "ionic-angular",
   "integrations": {
     "cordova": {}

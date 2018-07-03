@@ -53,11 +53,10 @@ export class HomePage {
           }, 3000);
         });
 
-
-    storage.clear();
-
         storage.get('recents').then((recents) => {
-            if(recents){
+            if(!recents){
+                recents = [];
+            }
                 // recents = _.sortBy(recents, function(o) { return moment(o.date); }).reverse();
 
                 for (const {domain, index} of recents.map((domain, index) => ({domain, index}))) {
@@ -77,7 +76,6 @@ export class HomePage {
                         this.active = err.ok;
                     });
                 }
-            }
         });
         
 
@@ -150,16 +148,15 @@ export class HomePage {
   }
 
   addToRecents(url){
-
+      
       let remove = this.recents.filter(recent => (recent.url.toLowerCase() === url.toLowerCase()));
       let fav = false;
 
-      if(remove[0].fav){
+      if(remove[0]){
           fav = remove[0].fav
       }
 
       this.recents = this.recents.filter(recent => remove.indexOf(recent) < 0);
-
       this.recents.unshift({url : url, date :  new Date().toLocaleString(), active : true, fav : fav});
 
       // @todo 10 should be some setting/constant
@@ -168,9 +165,7 @@ export class HomePage {
           this.recents.pop();
       }
 
-
-
-    return this.storage.set('recents', this.recents);
+      return this.storage.set('recents', this.recents);
   }
 
   toggleSubdomains(item, index){
